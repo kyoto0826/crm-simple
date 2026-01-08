@@ -1,0 +1,85 @@
+.card {
+  position: relative;
+  width: 400px;
+  padding: 12px 16px;
+  padding-top: 40px;
+  border-radius: 10px;
+
+  .fieldL {
+    position: absolute;
+    top: 12px;
+    left: 16px;
+    width: 120px;
+  }
+
+  .fieldR {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    width: 70px;
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    height: 32px;
+
+    .label {
+      width: 70px;
+    }
+
+    .cnt {
+      flex: auto;
+    }
+
+    .field {
+      flex: auto;
+
+      :global(.ant-select-selector) {
+        border-color: transparent !important;
+      }
+    }
+  }
+
+  &.long {
+    background-color: #f6ffed;
+    border: 1px solid #52c41a;
+
+    .fieldL,
+    .fieldR {
+      :global(.ant-select-selector) {
+        color: #52c41a !important;
+        border-color: #52c41a !important;
+      }
+
+      :global(.ant-select-selection-item) {
+        color: #52c41a !important;
+      }
+
+      :global(.ant-select-arrow) {
+        color: #52c41a !important;
+      }
+    }
+  }
+
+  &.short {
+    background-color: #fff2f0;
+    border: 1px solid #ff4d4f;
+
+    .fieldL,
+    .fieldR {
+      :global(.ant-select-selector) {
+        color: #ff4d4f !important;
+        border-color: #ff4d4f !important;
+      }
+
+      :global(.ant-select-selection-item) {
+        color: #ff4d4f !important;
+      }
+
+      :global(.ant-select-arrow) {
+        color: #ff4d4f !important;
+      }
+    }
+  }
+}
