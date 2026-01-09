@@ -124,7 +124,7 @@ export const layout: RunTimeLayoutConfig = ({
       return (
         <>
           {children}
-          {isDev && (
+          {/* {isDev && (
             <SettingDrawer
               disableUrlParams
               enableDarkTheme
@@ -136,7 +136,7 @@ export const layout: RunTimeLayoutConfig = ({
                 }));
               }}
             />
-          )}
+          )} */}
         </>
       );
     },

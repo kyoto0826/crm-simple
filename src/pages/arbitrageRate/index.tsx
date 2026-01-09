@@ -1,7 +1,7 @@
 import { queryArbitrageRate } from "@/services/arbitrageRate/api";
 import type { ActionType, ProColumns } from "@ant-design/pro-components";
 import { PageContainer, ProCard, ProTable } from "@ant-design/pro-components";
-import { Button, Flex, Select } from "antd";
+import { Button, Flex, InputNumber, Select, message } from "antd";
 import React, { useRef, useState } from "react";
 import styles from "./index.less";
 
@@ -27,6 +27,8 @@ const TableList: React.FC = () => {
     actionL: "",
     actionR: "",
   });
+  const [account, setAccount] = useState<number | null>(100);
+  const [isValid, setIsValid] = useState<boolean>(true);
   const columns: ProColumns<API.ArbitrageRateItem>[] = [
     {
       title: "交易对",
@@ -116,6 +118,20 @@ const TableList: React.FC = () => {
     },
   ];
 
+  // 数据还原
+  const resetFields = () => {
+    setArbitrage(null);
+    setFields({
+      tradeL: "",
+      tradeR: "",
+      actionL: "",
+      actionR: "",
+    });
+    setAccount(100);
+    setIsValid(true);
+  };
+
+  // 一键套利
   const handleArbitrage = (record: API.ArbitrageRateItem) => {
     setArbitrage(record);
     setFields((val) => ({
@@ -125,10 +141,24 @@ const TableList: React.FC = () => {
       actionL: "long",
       actionR: "short",
     }));
+    setTimeout(() => {
+      window.scrollTo(0, document.body.scrollHeight);
+    });
+  };
+
+  // 提交订单
+  const handleSubmit = async () => {
+    if (!account) {
+      setIsValid(false);
+      message.error("请填写数量");
+      return;
+    }
+    resetFields();
+    message.success("提交成功");
   };
 
   return (
-    <PageContainer title={<></>}>
+    <PageContainer header={{ title: "" }}>
       <ProCard title="交易所费率列表" bodyStyle={{ padding: 0 }}>
         <ProTable<API.ArbitrageRateItem, API.PageParams>
           actionRef={actionRef}
@@ -152,133 +182,151 @@ const TableList: React.FC = () => {
           title={`套利执行（${arbitrage.trade}）`}
           style={{ marginTop: 20 }}
         >
-          <Flex gap="middle" vertical={false}>
-            <div
-              className={`${styles.card} ${
-                fields.actionL === "long" ? styles.long : styles.short
-              }`}
-            >
-              <Select
-                className={styles.fieldL}
-                options={TradeOptions}
-                value={fields.tradeL}
-                size="small"
-                onChange={(value) => {
-                  setFields((val) => ({
-                    ...val,
-                    tradeL: value,
-                  }));
-                }}
-              />
-              <Select
-                className={styles.fieldR}
-                options={TypeOptions}
-                value={fields.actionL}
-                size="small"
-                onChange={(value) => {
-                  setFields((val) => ({
-                    ...val,
-                    actionL: value,
-                  }));
-                }}
-              />
-              <div className={styles.row}>
-                <label className={styles.label}>资金费率</label>
-                <span className={styles.cnt}>
-                  {fields.actionL === "long" ? "+" : "-"}
-                  {arbitrage?.[fields.tradeL]}%
-                </span>
-              </div>
-              <div className={styles.row}>
-                <label className={styles.label}>最新价格</label>
-                <span className={styles.cnt}>3000</span>
-              </div>
-              <div className={styles.row}>
-                <label className={styles.label}>账户余额</label>
-                <span className={styles.cnt}>3000 USDT</span>
-              </div>
-              <div className={styles.row}>
-                <label className={styles.label}>杠杆倍数</label>
+          <Flex gap="middle" vertical={true} style={{ width: 900 }}>
+            <Flex gap="middle" vertical={false}>
+              <div
+                className={`${styles.card} ${
+                  fields.actionL === "long" ? styles.long : styles.short
+                }`}
+              >
                 <Select
-                  className={styles.field}
-                  options={[{ value: "10", label: "10x" }]}
-                  value="10"
+                  className={styles.fieldL}
+                  options={TradeOptions}
+                  value={fields.tradeL}
                   size="small"
+                  onChange={(value) => {
+                    setFields((val) => ({
+                      ...val,
+                      tradeL: value,
+                    }));
+                  }}
+                />
+                <Select
+                  className={styles.fieldR}
+                  options={TypeOptions}
+                  value={fields.actionL}
+                  size="small"
+                  onChange={(value) => {
+                    setFields((val) => ({
+                      ...val,
+                      actionL: value,
+                    }));
+                  }}
+                />
+                <div className={styles.row}>
+                  <label className={styles.label}>资金费率</label>
+                  <span className={styles.cnt}>
+                    {fields.actionL === "long" ? "+" : "-"}
+                    {arbitrage?.[fields.tradeL]}%
+                  </span>
+                </div>
+                <div className={styles.row}>
+                  <label className={styles.label}>最新价格</label>
+                  <span className={styles.cnt}>3000</span>
+                </div>
+                <div className={styles.row}>
+                  <label className={styles.label}>账户余额</label>
+                  <span className={styles.cnt}>3000 USDT</span>
+                </div>
+                <div className={styles.row}>
+                  <label className={styles.label}>杠杆倍数</label>
+                  <Select
+                    className={styles.field}
+                    options={[{ value: "10", label: "10x" }]}
+                    value="10"
+                    size="small"
+                  />
+                </div>
+                <div className={styles.row}>
+                  <label className={styles.label}>委托模式</label>
+                  <Select
+                    className={styles.field}
+                    options={[{ value: "3001", label: "市价委托" }]}
+                    value="3001"
+                    size="small"
+                  />
+                </div>
+              </div>
+              <div
+                className={`${styles.card} ${
+                  fields.actionR === "long" ? styles.long : styles.short
+                }`}
+              >
+                <Select
+                  className={styles.fieldL}
+                  options={TradeOptions}
+                  value={fields.tradeR}
+                  size="small"
+                  onChange={(value) => {
+                    setFields((val) => ({
+                      ...val,
+                      tradeR: value,
+                    }));
+                  }}
+                />
+                <Select
+                  className={styles.fieldR}
+                  options={TypeOptions}
+                  value={fields.actionR}
+                  size="small"
+                  onChange={(value) => {
+                    setFields((val) => ({
+                      ...val,
+                      actionR: value,
+                    }));
+                  }}
+                />
+                <div className={styles.row}>
+                  <label className={styles.label}>资金费率</label>
+                  <span className={styles.cnt}>
+                    {fields.actionR === "long" ? "+" : "-"}
+                    {arbitrage?.[fields.tradeR]}%
+                  </span>
+                </div>
+                <div className={styles.row}>
+                  <label className={styles.label}>最新价格</label>
+                  <span className={styles.cnt}>3000</span>
+                </div>
+                <div className={styles.row}>
+                  <label className={styles.label}>账户余额</label>
+                  <span className={styles.cnt}>3000 USDT</span>
+                </div>
+                <div className={styles.row}>
+                  <label className={styles.label}>杠杆倍数</label>
+                  <Select
+                    className={styles.field}
+                    options={[{ value: "10", label: "10x" }]}
+                    value="10"
+                    size="small"
+                  />
+                </div>
+                <div className={styles.row}>
+                  <label className={styles.label}>委托模式</label>
+                  <Select
+                    className={styles.field}
+                    options={[{ value: "3001", label: "市价委托" }]}
+                    value="3001"
+                    size="small"
+                  />
+                </div>
+              </div>
+            </Flex>
+            <Flex gap="middle" vertical={false}>
+              <div className={`${styles.row} ${styles.rowAccount}`}>
+                <label className={styles.label}>数量</label>
+                <InputNumber
+                  className={styles.field}
+                  min={1}
+                  value={account}
+                  status={isValid ? "" : "error"}
+                  placeholder="请填写数量"
+                  onChange={setAccount}
                 />
               </div>
-              <div className={styles.row}>
-                <label className={styles.label}>委托模式</label>
-                <Select
-                  className={styles.field}
-                  options={[{ value: "3001", label: "市价委托" }]}
-                  value="3001"
-                  size="small"
-                />
-              </div>
-            </div>
-            <div
-              className={`${styles.card} ${
-                fields.actionR === "long" ? styles.long : styles.short
-              }`}
-            >
-              <Select
-                className={styles.fieldL}
-                options={TradeOptions}
-                value={fields.tradeR}
-                size="small"
-                onChange={(value) => {
-                  setFields((val) => ({
-                    ...val,
-                    tradeR: value,
-                  }));
-                }}
-              />
-              <Select
-                className={styles.fieldR}
-                options={TypeOptions}
-                value={fields.actionR}
-                size="small"
-                onChange={(value) => {
-                  setFields((val) => ({
-                    ...val,
-                    actionR: value,
-                  }));
-                }}
-              />
-              <div className={styles.row}>
-                <label className={styles.label}>资金费率</label>
-                <span className={styles.cnt}>
-                  {fields.actionR === "long" ? "+" : "-"}
-                  {arbitrage?.[fields.tradeR]}%
-                </span>
-              </div>
-              <div className={styles.row}>
-                <label className={styles.label}>最新价格</label>
-                <span className={styles.cnt}>3000</span>
-              </div>
-              <div className={styles.row}>
-                <label className={styles.label}>账户余额</label>
-                <span className={styles.cnt}>3000 USDT</span>
-              </div>
-              <div className={styles.row}>
-                <label className={styles.label}>杠杆倍数</label>
-                <Select
-                  className={styles.field}
-                  options={[{ value: "10", label: "10x" }]}
-                  value="10"
-                  size="small"
-                />
-              </div>
-              <div className={styles.row}>
-                <label className={styles.label}>委托模式</label>
-                <Select
-                  className={styles.field}
-                  options={[{ value: "3001", label: "市价委托" }]}
-                  value="3001"
-                  size="small"
-                />
-              </div>
-            </div>
+              <Button type="primary" onClick={handleSubmit}>
+                提交订单
+              </Button>
+            </Flex>
           </Flex>
         </ProCard>
       ) : null}

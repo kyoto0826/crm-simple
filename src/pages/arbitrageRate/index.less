@@ -1,6 +1,6 @@
 .card {
   position: relative;
-  width: 400px;
+  flex: auto;
   padding: 12px 16px;
   padding-top: 40px;
   border-radius: 10px;
@@ -17,28 +17,6 @@
     top: 12px;
     right: 16px;
     width: 70px;
-  }
-
-  .row {
-    display: flex;
-    align-items: center;
-    height: 32px;
-
-    .label {
-      width: 70px;
-    }
-
-    .cnt {
-      flex: auto;
-    }
-
-    .field {
-      flex: auto;
-
-      :global(.ant-select-selector) {
-        border-color: transparent !important;
-      }
-    }
   }
 
   &.long {
@@ -80,6 +58,37 @@
       :global(.ant-select-arrow) {
         color: #ff4d4f !important;
       }
+    }
+  }
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  height: 32px;
+
+  .label {
+    width: 70px;
+  }
+
+  .cnt {
+    flex: auto;
+  }
+
+  .field {
+    flex: auto;
+
+    :global(.ant-select-selector) {
+      border-color: transparent !important;
+    }
+  }
+
+  &.rowAccount {
+    flex: auto;
+
+    .label {
+      width: auto;
+      padding-right: 16px;
     }
   }
 }
