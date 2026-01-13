@@ -2,7 +2,7 @@ import { queryArbitrageRate } from "@/services/arbitrageRate/api";
 import type { ActionType, ProColumns } from "@ant-design/pro-components";
 import { PageContainer, ProCard, ProTable } from "@ant-design/pro-components";
 import { Button, Col, Flex, InputNumber, Row, Select, message } from "antd";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./index.less";
 
 const TradeOptions = [
@@ -17,6 +17,7 @@ const TypeOptions = [
 ];
 
 const TableList: React.FC = () => {
+  const cardTwoRef = useRef<any>(null);
   const actionRef = useRef<ActionType | null>(null);
   const [arbitrage, setArbitrage] = useState<API.ArbitrageRateItem | null>(
     null
@@ -29,6 +30,7 @@ const TableList: React.FC = () => {
   });
   const [account, setAccount] = useState<number | null>(100);
   const [isValid, setIsValid] = useState<boolean>(true);
+  const [rowsHeight, setRowsHeight] = useState<number>(400);
   const columns: ProColumns<API.ArbitrageRateItem>[] = [
     {
       title: "交易对",
@@ -147,9 +149,7 @@ const TableList: React.FC = () => {
       actionL: "long",
       actionR: "short",
     }));
-    setTimeout(() => {
-      window.scrollTo(0, document.body.scrollHeight);
-    });
+    setTimeout(calcTotalRowHeight);
   };
 
   // 提交订单
@@ -162,6 +162,20 @@ const TableList: React.FC = () => {
     resetFields();
     message.success("提交成功");
   };
+
+  const calcTotalRowHeight = () => {
+    const winH = window.innerHeight;
+    const cardTwo = cardTwoRef.current?.getBoundingClientRect();
+    const cardTwoH = cardTwo ? cardTwo.height + 20 : 0;
+    setRowsHeight(winH - 56 - 12 - 32.8 - 64 - 34 - cardTwoH - 48 - 12);
+  };
+
+  useEffect(() => {
+    window.addEventListener("resize", calcTotalRowHeight);
+    return () => {
+      window.removeEventListener("resize", calcTotalRowHeight);
+    };
+  });
 
   return (
     <PageContainer header={{ title: "" }}>
@@ -185,92 +199,96 @@ const TableList: React.FC = () => {
           request={queryArbitrageRate}
           columns={columns}
           pagination={{
-            pageSize: 10,
+            pageSize: 20,
             showQuickJumper: true,
           }}
           size="small"
-          scroll={{ x: 1000 }}
+          scroll={{ x: 1000, y: rowsHeight }}
+          onDataSourceChange={() => {
+            setTimeout(calcTotalRowHeight);
+          }}
         />
       </ProCard>
       {arbitrage ? (
-        <ProCard
-          title={`套利执行（${arbitrage.trade}）`}
-          style={{ marginTop: 20 }}
-        >
-          <Flex gap="middle" vertical={true} style={{ maxWidth: 1000 }}>
-            <Flex gap="middle" vertical={false}>
-              <div
-                className={`${styles.card} ${
-                  fields.actionL === "long" ? styles.long : styles.short
-                }`}
-              >
-                <Select
-                  className={styles.fieldL}
-                  options={TradeOptions}
-                  value={fields.tradeL}
-                  size="small"
-                  onChange={(value) => {
-                    setFields((val) => ({
-                      ...val,
-                      tradeL: value,
-                    }));
-                  }}
-                />
-                <Select
-                  className={styles.fieldR}
-                  options={TypeOptions}
-                  value={fields.actionL}
-                  size="small"
-                  onChange={(value) => {
-                    setFields((val) => ({
-                      ...val,
-                      actionL: value,
-                    }));
-                  }}
-                />
-                <Row>
-                  <Col span={12} className={styles.row}>
-                    <label className={styles.label}>资金费率</label>
-                    <span className={styles.cnt}>
-                      {fields.actionL === "long" ? "+" : "-"}
-                      {
-                        arbitrage?.[
-                          fields.tradeL as keyof API.ArbitrageRateItem
-                        ]
-                      }
-                      %
-                    </span>
-                  </Col>
-                  <Col span={12} className={styles.row}>
-                    <label className={styles.label}>最新价格</label>
-                    <span className={styles.cnt}>3000</span>
-                  </Col>
-                  <Col span={12} className={styles.row}>
-                    <label className={styles.label}>账户余额</label>
-                    <span className={styles.cnt}>3000 USDT</span>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col span={12} className={styles.row}>
-                    <label className={styles.label}>杠杆倍数</label>
-                    <Select
-                      className={styles.field}
-                      options={[{ value: "10", label: "10x" }]}
-                      value="10"
-                      size="small"
-                    />
-                  </Col>
-                  <Col span={12} className={styles.row}>
-                    <label className={styles.label}>委托模式</label>
-                    <Select
-                      className={styles.field}
-                      options={[{ value: "3001", label: "市价委托" }]}
-                      value="3001"
-                      size="small"
-                    />
-                  </Col>
-                </Row>
-                {/* <div className={styles.row}>
+        <div ref={cardTwoRef}>
+          <ProCard
+            title={`套利执行（${arbitrage.trade}）`}
+            style={{ marginTop: 20 }}
+          >
+            <Flex gap="middle" vertical={true} style={{ maxWidth: 1000 }}>
+              <Flex gap="middle" vertical={false}>
+                <div
+                  className={`${styles.card} ${
+                    fields.actionL === "long" ? styles.long : styles.short
+                  }`}
+                >
+                  <Select
+                    className={styles.fieldL}
+                    options={TradeOptions}
+                    value={fields.tradeL}
+                    size="small"
+                    onChange={(value) => {
+                      setFields((val) => ({
+                        ...val,
+                        tradeL: value,
+                      }));
+                    }}
+                  />
+                  <Select
+                    className={styles.fieldR}
+                    options={TypeOptions}
+                    value={fields.actionL}
+                    size="small"
+                    onChange={(value) => {
+                      setFields((val) => ({
+                        ...val,
+                        actionL: value,
+                      }));
+                    }}
+                  />
+                  <Row>
+                    <Col span={12} className={styles.row}>
+                      <label className={styles.label}>资金费率</label>
+                      <span className={styles.cnt}>
+                        {fields.actionL === "long" ? "+" : "-"}
+                        {
+                          arbitrage?.[
+                            fields.tradeL as keyof API.ArbitrageRateItem
+                          ]
+                        }
+                        %
+                      </span>
+                    </Col>
+                    <Col span={12} className={styles.row}>
+                      <label className={styles.label}>最新价格</label>
+                      <span className={styles.cnt}>3000</span>
+                    </Col>
+                    <Col span={12} className={styles.row}>
+                      <label className={styles.label}>账户余额</label>
+                      <span className={styles.cnt}>3000 USDT</span>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col span={12} className={styles.row}>
+                      <label className={styles.label}>杠杆倍数</label>
+                      <Select
+                        className={styles.field}
+                        options={[{ value: "10", label: "10x" }]}
+                        value="10"
+                        size="small"
+                      />
+                    </Col>
+                    <Col span={12} className={styles.row}>
+                      <label className={styles.label}>委托模式</label>
+                      <Select
+                        className={styles.field}
+                        options={[{ value: "3001", label: "市价委托" }]}
+                        value="3001"
+                        size="small"
+                      />
+                    </Col>
+                  </Row>
+                  {/* <div className={styles.row}>
                   <label className={styles.label}>资金费率</label>
                   <span className={styles.cnt}>
                     {fields.actionL === "long" ? "+" : "-"}
@@ -303,79 +321,79 @@ const TableList: React.FC = () => {
                     size="small"
                   />
                 </div> */}
-              </div>
-              <div
-                className={`${styles.card} ${
-                  fields.actionR === "long" ? styles.long : styles.short
-                }`}
-              >
-                <Select
-                  className={styles.fieldL}
-                  options={TradeOptions}
-                  value={fields.tradeR}
-                  size="small"
-                  onChange={(value) => {
-                    setFields((val) => ({
-                      ...val,
-                      tradeR: value,
-                    }));
-                  }}
-                />
-                <Select
-                  className={styles.fieldR}
-                  options={TypeOptions}
-                  value={fields.actionR}
-                  size="small"
-                  onChange={(value) => {
-                    setFields((val) => ({
-                      ...val,
-                      actionR: value,
-                    }));
-                  }}
-                />
-                <Row>
-                  <Col span={12} className={styles.row}>
-                    <label className={styles.label}>资金费率</label>
-                    <span className={styles.cnt}>
-                      {fields.actionR === "long" ? "+" : "-"}
-                      {
-                        arbitrage?.[
-                          fields.tradeR as keyof API.ArbitrageRateItem
-                        ]
-                      }
-                      %
-                    </span>
-                  </Col>
-                  <Col span={12} className={styles.row}>
-                    <label className={styles.label}>最新价格</label>
-                    <span className={styles.cnt}>3000</span>
-                  </Col>
-                  <Col span={12} className={styles.row}>
-                    <label className={styles.label}>账户余额</label>
-                    <span className={styles.cnt}>3000 USDT</span>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col span={12} className={styles.row}>
-                    <label className={styles.label}>杠杆倍数</label>
-                    <Select
-                      className={styles.field}
-                      options={[{ value: "10", label: "10x" }]}
-                      value="10"
-                      size="small"
-                    />
-                  </Col>
-                  <Col span={12} className={styles.row}>
-                    <label className={styles.label}>委托模式</label>
-                    <Select
-                      className={styles.field}
-                      options={[{ value: "3001", label: "市价委托" }]}
-                      value="3001"
-                      size="small"
-                    />
-                  </Col>
-                </Row>
-                {/* <div className={styles.row}>
+                </div>
+                <div
+                  className={`${styles.card} ${
+                    fields.actionR === "long" ? styles.long : styles.short
+                  }`}
+                >
+                  <Select
+                    className={styles.fieldL}
+                    options={TradeOptions}
+                    value={fields.tradeR}
+                    size="small"
+                    onChange={(value) => {
+                      setFields((val) => ({
+                        ...val,
+                        tradeR: value,
+                      }));
+                    }}
+                  />
+                  <Select
+                    className={styles.fieldR}
+                    options={TypeOptions}
+                    value={fields.actionR}
+                    size="small"
+                    onChange={(value) => {
+                      setFields((val) => ({
+                        ...val,
+                        actionR: value,
+                      }));
+                    }}
+                  />
+                  <Row>
+                    <Col span={12} className={styles.row}>
+                      <label className={styles.label}>资金费率</label>
+                      <span className={styles.cnt}>
+                        {fields.actionR === "long" ? "+" : "-"}
+                        {
+                          arbitrage?.[
+                            fields.tradeR as keyof API.ArbitrageRateItem
+                          ]
+                        }
+                        %
+                      </span>
+                    </Col>
+                    <Col span={12} className={styles.row}>
+                      <label className={styles.label}>最新价格</label>
+                      <span className={styles.cnt}>3000</span>
+                    </Col>
+                    <Col span={12} className={styles.row}>
+                      <label className={styles.label}>账户余额</label>
+                      <span className={styles.cnt}>3000 USDT</span>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col span={12} className={styles.row}>
+                      <label className={styles.label}>杠杆倍数</label>
+                      <Select
+                        className={styles.field}
+                        options={[{ value: "10", label: "10x" }]}
+                        value="10"
+                        size="small"
+                      />
+                    </Col>
+                    <Col span={12} className={styles.row}>
+                      <label className={styles.label}>委托模式</label>
+                      <Select
+                        className={styles.field}
+                        options={[{ value: "3001", label: "市价委托" }]}
+                        value="3001"
+                        size="small"
+                      />
+                    </Col>
+                  </Row>
+                  {/* <div className={styles.row}>
                   <label className={styles.label}>资金费率</label>
                   <span className={styles.cnt}>
                     {fields.actionR === "long" ? "+" : "-"}
@@ -408,26 +426,27 @@ const TableList: React.FC = () => {
                     size="small"
                   />
                 </div> */}
-              </div>
+                </div>
+              </Flex>
+              <Flex gap="middle" vertical={false}>
+                <div className={`${styles.row} ${styles.rowAccount}`}>
+                  <label className={styles.label}>数量</label>
+                  <InputNumber
+                    className={styles.field}
+                    min={1}
+                    value={account}
+                    status={isValid ? "" : "error"}
+                    placeholder="请填写数量"
+                    onChange={setAccount}
+                  />
+                </div>
+                <Button type="primary" onClick={handleSubmit}>
+                  提交订单
+                </Button>
+              </Flex>
             </Flex>
-            <Flex gap="middle" vertical={false}>
-              <div className={`${styles.row} ${styles.rowAccount}`}>
-                <label className={styles.label}>数量</label>
-                <InputNumber
-                  className={styles.field}
-                  min={1}
-                  value={account}
-                  status={isValid ? "" : "error"}
-                  placeholder="请填写数量"
-                  onChange={setAccount}
-                />
-              </div>
-              <Button type="primary" onClick={handleSubmit}>
-                提交订单
-              </Button>
-            </Flex>
-          </Flex>
-        </ProCard>
+          </ProCard>
+        </div>
       ) : null}
     </PageContainer>
   );

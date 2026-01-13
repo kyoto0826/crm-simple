@@ -134,7 +134,7 @@ export default defineConfig({
       },
     },
     // 开启暗色主题
-    // dark: true,
+    dark: true,
   },
   /**
    * @name 网络请求配置

@@ -65,7 +65,7 @@ const getArbitrageRate = (_req: Request, res: Response) => {
   }
 
   const result = {
-    data: Array.from({ length: 10 }, (_, index) =>
+    data: Array.from({ length: 20 }, (_, index) =>
       generateRandomData(index + 1)
     ),
     total: 22,
