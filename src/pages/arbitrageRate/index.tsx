@@ -51,21 +51,21 @@ const TableList: React.FC = () => {
     {
       title: "Binance",
       dataIndex: "binance",
-      width: 120,
+      width: 100,
       hideInSearch: true,
       renderText: (val: number) => val && val !== 0 && `+${val}%`,
     },
     {
       title: "OKX",
       dataIndex: "okx",
-      width: 120,
+      width: 100,
       hideInSearch: true,
       renderText: (val: number) => val && val !== 0 && `+${val}%`,
     },
     {
       title: "HTX",
       dataIndex: "htx",
-      width: 120,
+      width: 100,
       hideInSearch: true,
       renderText: (val: number) => val && val !== 0 && `+${val}%`,
     },
@@ -76,25 +76,19 @@ const TableList: React.FC = () => {
       valueEnum: Object.fromEntries(
         Array.from({ length: 8 }, (_, i) => [i + 1, `${i + 1}小时`])
       ),
-      width: 120,
+      width: 100,
     },
     {
       title: "下次费率时间/倒计时",
       hideInSearch: true,
-      width: 180,
-      render: (_, record) => (
-        <>
-          {record.nextAt}
-          <br />
-          {record.cd}
-        </>
-      ),
+      width: 210,
+      render: (_, record) => `${record.nextAt || "-"} / ${record.cd || "-"}`,
     },
     {
       title: "最优APY(10x)",
       dataIndex: "apy",
       hideInSearch: true,
-      width: 130,
+      width: 110,
       renderText: (val: number) => val && val !== 0 && `${val}%`,
     },
     {
@@ -103,15 +97,21 @@ const TableList: React.FC = () => {
       dataIndex: "updatedAt",
       valueType: "dateTime",
       hideInSearch: true,
-      width: 180,
+      width: 150,
     },
     {
       title: "操作",
       dataIndex: "option",
       valueType: "option",
-      width: 100,
+      fixed: "right",
+      width: 80,
       render: (_, record) => [
-        <Button type="primary" ghost onClick={() => handleArbitrage(record)}>
+        <Button
+          type="primary"
+          ghost
+          size="small"
+          onClick={() => handleArbitrage(record)}
+        >
           一键套利
         </Button>,
       ],
@@ -164,7 +164,7 @@ const TableList: React.FC = () => {
           actionRef={actionRef}
           rowKey="id"
           search={{
-            labelWidth: 100,
+            labelWidth: "auto",
           }}
           optionsRender={() => []}
           toolBarRender={() => []}
@@ -175,6 +175,7 @@ const TableList: React.FC = () => {
             showQuickJumper: true,
           }}
           size="small"
+          scroll={{ x: 1000 }}
         />
       </ProCard>
       {arbitrage ? (
