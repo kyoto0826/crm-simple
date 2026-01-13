@@ -121,13 +121,16 @@ export default defineConfig({
         token: {
           fontFamily: "AlibabaSans, sans-serif",
           fontSize: 12, // 全局基础字号（默认 14）
-          lineHeight: 1.3, // 全局基础行高（默认约 1.5715）
+          lineHeight: 1.2, // 全局基础行高（默认约 1.5715）
         },
-        components: {
-          Sider: {
-            siderWidth: 50, // 侧边栏宽度
-          },
-        },
+        // components: {
+        //   Table: {
+        //     size: "small",
+        //   },
+        //   Button: {
+        //     size: "small",
+        //   },
+        // },
       },
     },
     // 开启暗色主题

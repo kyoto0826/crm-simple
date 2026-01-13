@@ -65,11 +65,11 @@ const getArbitrageRate = (_req: Request, res: Response) => {
   }
 
   const result = {
-    data: Array.from({ length: 5 }, (_, index) =>
+    data: Array.from({ length: 10 }, (_, index) =>
       generateRandomData(index + 1)
     ),
-    total: 12,
-    pageSize: 5,
+    total: 22,
+    pageSize: 10,
     current: 1,
     success: true,
   };

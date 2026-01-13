@@ -1,7 +1,7 @@
 import { queryArbitrageRate } from "@/services/arbitrageRate/api";
 import type { ActionType, ProColumns } from "@ant-design/pro-components";
 import { PageContainer, ProCard, ProTable } from "@ant-design/pro-components";
-import { Button, Flex, InputNumber, Select, message } from "antd";
+import { Button, Col, Flex, InputNumber, Row, Select, message } from "antd";
 import React, { useRef, useState } from "react";
 import styles from "./index.less";
 
@@ -46,26 +46,29 @@ const TableList: React.FC = () => {
           "DOGE-USDT",
         ].map((item) => [item, item])
       ),
-      width: 120,
+      width: 110,
+      fieldProps: {
+        size: "small",
+      },
     },
     {
       title: "Binance",
       dataIndex: "binance",
-      width: 100,
+      width: 90,
       hideInSearch: true,
       renderText: (val: number) => val && val !== 0 && `+${val}%`,
     },
     {
       title: "OKX",
       dataIndex: "okx",
-      width: 100,
+      width: 90,
       hideInSearch: true,
       renderText: (val: number) => val && val !== 0 && `+${val}%`,
     },
     {
       title: "HTX",
       dataIndex: "htx",
-      width: 100,
+      width: 90,
       hideInSearch: true,
       renderText: (val: number) => val && val !== 0 && `+${val}%`,
     },
@@ -76,19 +79,22 @@ const TableList: React.FC = () => {
       valueEnum: Object.fromEntries(
         Array.from({ length: 8 }, (_, i) => [i + 1, `${i + 1}小时`])
       ),
-      width: 100,
+      width: 80,
+      fieldProps: {
+        size: "small",
+      },
     },
     {
       title: "下次费率时间/倒计时",
       hideInSearch: true,
-      width: 210,
+      width: 200,
       render: (_, record) => `${record.nextAt || "-"} / ${record.cd || "-"}`,
     },
     {
       title: "最优APY(10x)",
       dataIndex: "apy",
       hideInSearch: true,
-      width: 110,
+      width: 100,
       renderText: (val: number) => val && val !== 0 && `${val}%`,
     },
     {
@@ -97,7 +103,7 @@ const TableList: React.FC = () => {
       dataIndex: "updatedAt",
       valueType: "dateTime",
       hideInSearch: true,
-      width: 150,
+      width: 140,
     },
     {
       title: "操作",
@@ -107,8 +113,8 @@ const TableList: React.FC = () => {
       width: 80,
       render: (_, record) => [
         <Button
-          type="primary"
-          ghost
+          color="primary"
+          variant="link"
           size="small"
           onClick={() => handleArbitrage(record)}
         >
@@ -165,13 +171,21 @@ const TableList: React.FC = () => {
           rowKey="id"
           search={{
             labelWidth: "auto",
+            optionRender: (searchConfig, formProps, dom) =>
+              dom.map((btn) =>
+                React.isValidElement(btn)
+                  ? React.cloneElement(btn as React.ReactElement<any>, {
+                      size: "small",
+                    })
+                  : btn
+              ),
           }}
           optionsRender={() => []}
           toolBarRender={() => []}
           request={queryArbitrageRate}
           columns={columns}
           pagination={{
-            pageSize: 5,
+            pageSize: 10,
             showQuickJumper: true,
           }}
           size="small"
@@ -183,7 +197,7 @@ const TableList: React.FC = () => {
           title={`套利执行（${arbitrage.trade}）`}
           style={{ marginTop: 20 }}
         >
-          <Flex gap="middle" vertical={true} style={{ width: 900 }}>
+          <Flex gap="middle" vertical={true} style={{ maxWidth: 1000 }}>
             <Flex gap="middle" vertical={false}>
               <div
                 className={`${styles.card} ${
@@ -214,7 +228,49 @@ const TableList: React.FC = () => {
                     }));
                   }}
                 />
-                <div className={styles.row}>
+                <Row>
+                  <Col span={12} className={styles.row}>
+                    <label className={styles.label}>资金费率</label>
+                    <span className={styles.cnt}>
+                      {fields.actionL === "long" ? "+" : "-"}
+                      {
+                        arbitrage?.[
+                          fields.tradeL as keyof API.ArbitrageRateItem
+                        ]
+                      }
+                      %
+                    </span>
+                  </Col>
+                  <Col span={12} className={styles.row}>
+                    <label className={styles.label}>最新价格</label>
+                    <span className={styles.cnt}>3000</span>
+                  </Col>
+                  <Col span={12} className={styles.row}>
+                    <label className={styles.label}>账户余额</label>
+                    <span className={styles.cnt}>3000 USDT</span>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={12} className={styles.row}>
+                    <label className={styles.label}>杠杆倍数</label>
+                    <Select
+                      className={styles.field}
+                      options={[{ value: "10", label: "10x" }]}
+                      value="10"
+                      size="small"
+                    />
+                  </Col>
+                  <Col span={12} className={styles.row}>
+                    <label className={styles.label}>委托模式</label>
+                    <Select
+                      className={styles.field}
+                      options={[{ value: "3001", label: "市价委托" }]}
+                      value="3001"
+                      size="small"
+                    />
+                  </Col>
+                </Row>
+                {/* <div className={styles.row}>
                   <label className={styles.label}>资金费率</label>
                   <span className={styles.cnt}>
                     {fields.actionL === "long" ? "+" : "-"}
@@ -246,7 +302,7 @@ const TableList: React.FC = () => {
                     value="3001"
                     size="small"
                   />
-                </div>
+                </div> */}
               </div>
               <div
                 className={`${styles.card} ${
@@ -277,7 +333,49 @@ const TableList: React.FC = () => {
                     }));
                   }}
                 />
-                <div className={styles.row}>
+                <Row>
+                  <Col span={12} className={styles.row}>
+                    <label className={styles.label}>资金费率</label>
+                    <span className={styles.cnt}>
+                      {fields.actionR === "long" ? "+" : "-"}
+                      {
+                        arbitrage?.[
+                          fields.tradeR as keyof API.ArbitrageRateItem
+                        ]
+                      }
+                      %
+                    </span>
+                  </Col>
+                  <Col span={12} className={styles.row}>
+                    <label className={styles.label}>最新价格</label>
+                    <span className={styles.cnt}>3000</span>
+                  </Col>
+                  <Col span={12} className={styles.row}>
+                    <label className={styles.label}>账户余额</label>
+                    <span className={styles.cnt}>3000 USDT</span>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col span={12} className={styles.row}>
+                    <label className={styles.label}>杠杆倍数</label>
+                    <Select
+                      className={styles.field}
+                      options={[{ value: "10", label: "10x" }]}
+                      value="10"
+                      size="small"
+                    />
+                  </Col>
+                  <Col span={12} className={styles.row}>
+                    <label className={styles.label}>委托模式</label>
+                    <Select
+                      className={styles.field}
+                      options={[{ value: "3001", label: "市价委托" }]}
+                      value="3001"
+                      size="small"
+                    />
+                  </Col>
+                </Row>
+                {/* <div className={styles.row}>
                   <label className={styles.label}>资金费率</label>
                   <span className={styles.cnt}>
                     {fields.actionR === "long" ? "+" : "-"}
@@ -309,7 +407,7 @@ const TableList: React.FC = () => {
                     value="3001"
                     size="small"
                   />
-                </div>
+                </div> */}
               </div>
             </Flex>
             <Flex gap="middle" vertical={false}>
