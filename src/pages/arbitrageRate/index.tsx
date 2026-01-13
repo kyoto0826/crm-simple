@@ -205,6 +205,7 @@ const TableList: React.FC = () => {
           size="small"
           scroll={{ x: 1000, y: rowsHeight }}
           onDataSourceChange={() => {
+            resetFields();
             setTimeout(calcTotalRowHeight);
           }}
         />
